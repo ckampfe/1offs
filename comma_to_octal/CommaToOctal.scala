@@ -18,7 +18,7 @@ object CommaToOctal {
     def readWriteLines(inFile: CSVReader): Unit = Option(inFile.readNext()) match {
       case None    => inFile.close()
       case Some(l) =>
-        writer.writeNext(l.mkString("\001,\001"))
+        writer.writeNext(l.mkString("\001"))
         readWriteLines(inFile)
     }
   }
