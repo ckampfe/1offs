@@ -1,3 +1,3 @@
 scalaVersion := "2.11.2"
 
-libraryDependencies += "au.com.bytecode" % "opencsv" % "2.4"
+libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.3"

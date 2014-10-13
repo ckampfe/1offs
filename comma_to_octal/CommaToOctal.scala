@@ -4,22 +4,38 @@ import java.io.FileWriter
 
 object CommaToOctal {
   def main(args: Array[String]) = {
-    val in     = args(0)
-    val out    = args(1)
-    val reader = new CSVReader(new FileReader(in))
-    val writer = new CSVWriter(new FileWriter(out))
-    writeToOutputFile(reader, writer)
+    val inName         = args(0)
+    val outName        = args(1)
+
+    val separatorChar  = args.lift(2) match {
+      case None    => '\u0001'
+      case Some(c) => c.toCharArray.apply(0)
+    }
+
+    val csvInput  = new CSVReader(new FileReader(inName))
+    val csvOutput = new CSVWriter(
+      new FileWriter(outName),
+      separatorChar.charValue(),
+      CSVWriter.NO_QUOTE_CHARACTER
+    )
+
+    writeToOutputFile(csvInput, csvOutput, separatorChar)
   }
 
-  def writeToOutputFile(inFile: CSVReader, writer: CSVWriter) = {
+  def writeToOutputFile(
+    csvInput: CSVReader,
+    csvOutput: CSVWriter,
+    separatorChar: Char
+  ) = {
     println("starting conversion...")
-    readWriteLines(inFile)
 
-    def readWriteLines(inFile: CSVReader): Unit = Option(inFile.readNext()) match {
-      case None    => inFile.close()
+    readWriteLines()
+
+    def readWriteLines(): Unit = Option(csvInput.readNext()) match {
+      case None    => csvInput.close()
       case Some(l) =>
-        writer.writeNext(l.mkString("\001"))
-        readWriteLines(inFile)
+        csvOutput.writeNext(l)
+        readWriteLines()
     }
   }
 }
