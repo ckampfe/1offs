@@ -12,7 +12,13 @@ object CommaToOctal {
       case Some(c) => c.toCharArray.apply(0)
     }
 
-    val csvInput  = new CSVReader(new FileReader(inName))
+    val csvInput  = new CSVReader(
+      new FileReader(inName),
+      ',',
+      '"',
+      '|'
+    )
+
     val csvOutput = new CSVWriter(
       new FileWriter(outName),
       separatorChar.charValue(),
