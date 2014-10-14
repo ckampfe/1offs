@@ -35,13 +35,13 @@ object CommaToOctal {
   ) = {
     println("starting conversion...")
 
-    readWriteLines()
+    readWriteLines(Option(csvInput.readNext()))
 
-    def readWriteLines(): Unit = Option(csvInput.readNext()) match {
+    def readWriteLines(line: Option[Array[String]]): Unit = line match {
       case None    => csvInput.close()
       case Some(l) =>
         csvOutput.writeNext(l)
-        readWriteLines()
+        readWriteLines(Option(csvInput.readNext()))
     }
   }
 }
