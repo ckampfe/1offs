@@ -10,8 +10,14 @@ case class CsvIO(
   originalHeaders: List[String]
 ) {
   def writeToOutputFile(newHeaders: List[String]) = {
+    writer.writeNext(newHeaders.toArray)
+
     def readWriteLines(line: Option[Array[String]]): Unit = line match {
-      case None      => reader.close()
+      case None =>
+        println("closing...")
+        writer.close()
+        System.exit(0)
+
       case Some(row) =>
         val mappedRow = originalHeaders.zip(row).toMap
         val reorderedRow = reorderMappedRow(mappedRow, newHeaders)
@@ -23,8 +29,6 @@ case class CsvIO(
     readWriteLines(Option(reader.readNext()))
   }
 
-  // take a map, and order the vals according to
-  // keys provided by a list. Keys must be complete.
   def reorderMappedRow[A](m: Map[A, A], keys: List[A]) = {
     def loop(l: List[A], result: List[A]): List[A] =
       if (l.isEmpty) result.reverse
@@ -36,8 +40,6 @@ case class CsvIO(
 
 object CsvIO {
   def apply(inName: String, outName: String, separatorChar: Char) = {
-    // make new input and output objects and
-    // initialize a new instance with them
     val reader  = new CSVReader(
       new FileReader(inName),
       ',',
