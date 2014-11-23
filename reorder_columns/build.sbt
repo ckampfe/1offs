@@ -1,3 +1,6 @@
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
 
-libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.3"
+libraryDependencies ++= Seq(
+  "com.opencsv" % "opencsv" % "3.1",
+  "com.typesafe.akka" %% "akka-actor" % "2.3.7"
+)
