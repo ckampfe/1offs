@@ -13,13 +13,27 @@ import org.jnativehook.keyboard.NativeKeyListener
 object Main extends NativeKeyListener {
 
   // top level state initialization
-  var csv: CsvIO = null
-  var originalHeaders = List[String]()
-  var userState = UserState("selecting", originalHeaders, 0)
+  val system = ActorSystem("csvSystem")
+
+  var userState           = UserState("selecting", List[String](), 0)
+
+  var newHeaders          = List[String]()
+  var originalHeaders     = List[String]()
+  var inName              = ""
+  var outName             = ""
+  var separatorChar: Char = '\u0001'
 
   def main(args: Array[String]) = {
-    csv = setUpCsvReadWrite(args)
-    userState = UserState("selecting", csv.originalHeaders, 0)
+    inName  = args(0)
+    outName = args(1)
+    separatorChar  = args.lift(2) match {
+      case None    => '\u0001'
+      case Some(c) => c.toCharArray.apply(0)
+    }
+
+    originalHeaders = getHeaders(inName)
+    // lets us print original headers
+    userState = UserState("selecting", originalHeaders, 0)
     setUpKeyListening()
     blank(); blank()
   }
@@ -31,9 +45,31 @@ object Main extends NativeKeyListener {
 
     userState match {
       case UserState("parsing", newHeaders, _) =>
-        csv.writeToOutputFile(newHeaders)
         GlobalScreen.getInstance().removeNativeKeyListener(this)
         GlobalScreen.unregisterNativeHook()
+
+        val csvWriter = new CSVWriter(
+          new FileWriter(outName),
+          separatorChar.charValue(),
+          CSVWriter.NO_QUOTE_CHARACTER
+        )
+
+        val csvReader = new CSVReader(
+          new FileReader(inName),
+          ',',
+          '"',
+          '|'
+        )
+
+        // actors
+        val writer   = system.actorOf(Writer.props(csvWriter))
+        val arranger = system.actorOf(
+          Arranger.props(originalHeaders, newHeaders, writer)
+        )
+        val reader   = system.actorOf(Reader.props(csvReader, arranger))
+
+        // kick off processing
+        reader ! ("start", newHeaders)
       case _ => printColumns(userState)
     }
   }
@@ -63,15 +99,13 @@ object Main extends NativeKeyListener {
     print("\b" * 40)
   }
 
-  def setUpCsvReadWrite(args: Array[String]) = {
-    val inName         = args(0)
-    val outName        = args(1)
-    val separatorChar  = args.lift(2) match {
-      case None    => '\u0001'
-      case Some(c) => c.toCharArray.apply(0)
-    }
-
-    CsvIO(inName, outName, separatorChar)
+  def getHeaders(inName: String) = {
+    new CSVReader(
+      new FileReader(inName),
+      ',',
+      '"',
+      '|'
+    ).readNext().toList
   }
 
   def setUpKeyListening() = {
