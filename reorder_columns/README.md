@@ -1,2 +1,2 @@
-$ sbt
-> run infile.csv outfile.csv
+`$ sbt`
+`> run infile.csv outfile.csv`
