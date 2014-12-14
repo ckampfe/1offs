@@ -32,8 +32,8 @@ object Split {
     numOfSplits: Long): Map[Long, Seq[String]] = {
     linesWithNumbers.
     groupBy { case (line, number) => number % numOfSplits }.
-    map     { case (splitNo, v)   =>
-      (splitNo, v.map { case (line, _) => line }) // ie, (1, "some line")
+    map     { case (splitNo, lineAndLineNumber) =>
+      (splitNo, lineAndLineNumber.map { case (line, _) => line })
     }
   }
 
