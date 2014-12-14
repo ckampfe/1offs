@@ -12,7 +12,7 @@ import java.io._
 object Split {
   /**
    * args(0): inFileName
-   * args(1): # splits (N) default 2
+   * args(1): # of splits
    */
   def main(args: Array[String]): Unit = {
     if (args.length < 2) error("<input file> <number of splits>")
@@ -20,8 +20,8 @@ object Split {
     val inFileName  = args(0)
     val numOfSplits = args(1).toLong
 
-    val fileIterator     = Source.fromFile(inFileName).getLines
-    val linesWithNumbers = fileIterator.zipWithIndex.toIndexedSeq
+    val fileIterator        = Source.fromFile(inFileName).getLines
+    val linesWithNumbers    = fileIterator.zipWithIndex.toIndexedSeq
     val linesMappedToSplits = mapLinesToSplits(linesWithNumbers, numOfSplits)
 
     writeSplits(linesMappedToSplits, inFileName)
